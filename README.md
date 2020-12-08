@@ -1,89 +1,9 @@
-# financialadvisor
-import pandas as pd
-import fix_yahoo_finance as yf
-from datetime import datetime 
-from datetime import timedelta
-import numpy as np
-import sympy as sym 
-import matplotlib.pyplot as plt
-import math
+Este código de Python es una herramienta financiera que analiza datos de Yahoo Finance para tomar una decisión de apertura en el mercado. Por ahora es una herramienta netamente académica, su uso no está sometido completamente a prueba. Teniendo en cuenta que se trata de un ejercicio predictivo y especulativo, aun no se recomienda usar en un ejercicio de inversión real. Está diseñado especialmente para Forex, sin embargo es adaptable para cualquier activo incluido en Yahoo Finance.
 
+El algoritmo importa los datos de precios de cierre del activo del último año y modela, bajo el método numérico de mínimos cuadrados, una función. Con esa función intenta predecir el valor con el que el activo DEBERÍA cerrar al siguiente día. Se pueden presentar dos escenarios:
 
-def text_prompt(msg):
-  try:
-    return raw_input(msg)
-  except NameError:
-    return input(msg)
+a. Se quiere abrir una posición: En este caso, con el histórico de cierres del último año se calcula la desviación estandar del activo con respecto al valor que debería presentar en la función, si el valor de la función más la desviación estandar es menor que el precio de cierre, se recomienda abrir la posición en venta. (Para el caso de Forex, en acciones no sería posible abrir una posición). En caso que el valor de la función menos la desviación estandar sea mayor que la función, se recomienda abrir la posición en venta. (Tanto para Forex como para acciones).
 
-def upRange(start, stop, step):
-  while start <= stop:
-    yield start
-    start += abs(step)
+b. Se quiere cerrar una posición: Si la posición que se tiene abierta es de venta, cuando el activo esté un 1% por encima de su valor esperado por medio de la función, el algoritmo recomienda cerrar la posición. Si la posición es de compra, cuando el activo esté un 1% por debajo del valor esperado por medio de la posición se recomienda cerrar la posición.
 
-def downRange(start, stop, step):
-  while start >= stop:
-    yield start
-    start -= abs(step)
-
-
-n = float(text_prompt('Ingrese la cantidad de activos que quiere evaluar'))
-for i in (1 <= float(n)) and upRange(1, float(n), 1) or downRange(1, float(n), 1):
-
-  today = datetime.now()
-  firstday = today - timedelta(days=360)
-  a = text_prompt("Ingrese nombre de activo. Asegurese de escribirlo con el código asignado en Yahoo Finance.")
-  activo = yf.download(a, start= firstday ,end= today)
-  cierres = []
-  activo.shape
-  d = activo.shape[0]
-  for j in (1 <= float(d-1)) and upRange(1, float(d-1), 1) or downRange(1, float(d-1), 1):
-    e =activo.iloc[j,4]
-    f = float (e)
-    cierres.append(f)
-  g = len(cierres)
-  sumax = 0
-  for j in (1 <= g) and upRange(1, g, 1) or downRange(1, g, 1):
-    sumax = sumax +j
-  sumay = 0
-  for j in (1 <= g) and upRange(1, g, 1) or downRange(1, g, 1):
-    sumay = sumay + cierres[j-1]
-  sumaxy = 0
-  for j in (1 <= g) and upRange(1, g, 1) or downRange(1, g, 1):
-    sumaxy = sumaxy +(j*cierres[j-1])
-  xsqr=0
-  for j in (1 <= g) and upRange(1, g, 1) or downRange(1, g, 1):
-    xsqr = xsqr + (j*j)
-  m = (sumaxy - ((sumax * sumay)/g))/(xsqr - (pow(sumax,2))/g)
-  b = (sumay/g)-(m*(sumax/g))
-  futuro = m*(g+1) + b
-  sumadev = 0
-  for j in (1 <= g) and upRange(1, g, 1) or downRange(1, g, 1):
-    sumadev = sumadev + pow(abs((sumay/g)-cierres[j-1]),2)
-  de = math.sqrt(sumadev/g)
-  ac = text_prompt("¿Qué tipo de operación desea hacer? Si es apertura escriba (a) si es cierre escriba (c)")
-  if (ac=="a"):
-    z = 0
-    if (futuro + de <= cierres[g-1] and cierres[g-1]>futuro):
-      print ("El activo ",a," está en zona de venta" )
-      z = 1
-    if (futuro-de >= cierres[g-1] and cierres[g-1]<futuro):
-      print ("El activo ",a," está en zona de compra" )
-      z = 1
-    if (z==0):
-      print ("El activo ",a," está en zona de espera, se recomienda no operar" )  
-  if (ac=="c"):
-    cv = text_prompt("¿Su activo es de compra o venta? Si es compra escriba (c), si es venta escriba (v).")
-    if (cv=="v"):
-      if (futuro+futuro*0.01 > cierres[g-1]):
-        print ("Se recomienda cerrar posición del activo ",a)
-        print (futuro,cierres[g-1])
-      else:
-        print ("Se recomienda mantener posición del activo ",a)
-    if (cv=="c"):
-      if (futuro- futuro*0.01 < cierres[g-1]):
-        print ("Se recomienda cerrar posición del activo ",a)
-      else:
-        print ("Se recomienda mantener posición del activo ",a)
-  column = activo["Adj Close"]
-  column.plot(grid=True)
-  plt.show()
+El algoritmo calcula la cantidad de activos que se soliciten y van aconsejando uno por uno.
